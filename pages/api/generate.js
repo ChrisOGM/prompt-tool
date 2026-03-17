@@ -12,11 +12,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           contents: [
             {
-              parts: [
-                {
-                  text: `Turn this idea into a powerful, detailed AI prompt:\n\n${idea}`,
-                },
-              ],
+              parts: [{ text: idea }],
             },
           ],
         }),
@@ -25,22 +21,14 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    console.log("DATA:", JSON.stringify(data, null, 2));
+    // 👇 RETURN RAW RESPONSE
+    res.status(200).json({
+      output: JSON.stringify(data, null, 2),
+    });
 
-    // 🔥 SAFE extraction (handles all cases)
-    let output = "No response";
-
-    if (
-      data &&
-      data.candidates &&
-      data.candidates.length > 0 &&
-      data.candidates[0].content &&
-      data.candidates[0].content.parts &&
-      data.candidates[0].content.parts.length > 0
-    ) {
-      output = data.candidates[0].content.parts
-        .map((p) => p.text)
-        .join("");
-    }
-
-    res.status(200).json({ output });
+  } catch (err) {
+    res.status(500).json({
+      output: "Server error: " + err.message,
+    });
+  }
+}
